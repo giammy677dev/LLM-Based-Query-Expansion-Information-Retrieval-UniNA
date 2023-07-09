@@ -1,6 +1,7 @@
 function doSearch() {
   var queryMenu = document.getElementById("queryMenu");
   var queryId = parseInt(queryMenu.value, 10);
+  console.log(queryId)
   var queryText = queryMenu.options[queryMenu.selectedIndex].text;
 
   loadRelevancyData(function(relevancyData) {
@@ -43,6 +44,9 @@ function displaySearchResults(results, relevancyData, queryId, searchResultsDiv)
   searchResultsDiv.innerHTML = "";
   var docs = results.response.docs;
 
+  var numDocumentiRilevanti = 0; // Contatore per il numero di documenti rilevanti
+  var totalDocumentiRilevanti = countRelevantDocuments(relevancyData, queryId); // Numero totale di documenti rilevanti
+
   for (var i = 0; i < docs.length; i++) {
     var result = docs[i];
     var resultDiv = document.createElement("div");
@@ -51,8 +55,11 @@ function displaySearchResults(results, relevancyData, queryId, searchResultsDiv)
     var doc_id = result.ID[0];
     
     if (isRelevant(doc_id, queryId, relevancyData)) {
+      numDocumentiRilevanti++;
+      var position = i + 1;
+
       var boldTitle = document.createElement("b");
-      boldTitle.textContent = "ID: " + doc_id + " - Titolo: " + title;
+      boldTitle.textContent = "ID: " + doc_id + " - Titolo: " + title + " - Position: " + position + " - Numero documento: " + numDocumentiRilevanti +  " - Recall: " + calculateRecall(numDocumentiRilevanti, totalDocumentiRilevanti) + "% - Precision: " + calculatePrecision(numDocumentiRilevanti, position) + "%";
       resultDiv.appendChild(boldTitle);
     } else {
       resultDiv.textContent = "ID: " + doc_id + " - Titolo: " + title;
@@ -72,4 +79,28 @@ function isRelevant(doc_id, queryId, relevancyData) {
     }
   }
   return false;
+}
+
+function countRelevantDocuments(relevancyData, queryId) {
+  // Conta il numero totale di documenti rilevanti per la query
+  var count = 0;
+  for (var i = 0; i < relevancyData.length; i++) {
+    var relevancyEntry = relevancyData[i];
+    if (relevancyEntry.id_query === queryId.toString()) {
+      count++;
+    }
+  }
+  return count;
+}
+
+function calculateRecall(numDocumentiRilevanti, totalDocumentiRilevanti) {
+  // Calcola il valore di Recall
+  var recall = (numDocumentiRilevanti / totalDocumentiRilevanti) * 100;
+  return recall.toFixed(2); // Arrotonda il valore a 2 cifre decimali
+}
+
+function calculatePrecision(numDocumentiRilevanti, position) {
+  // Calcola il valore di Precision
+  var precision = (numDocumentiRilevanti / position) * 100;
+  return precision.toFixed(2); // Arrotonda il valore a 2 cifre decimali
 }
