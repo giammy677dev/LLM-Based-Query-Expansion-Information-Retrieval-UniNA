@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Interfaccia di ricerca Solr</title>
+  <!-- Includi il tuo file CSS -->
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="bridge.js"></script>
+</head>
+<body>
+  <h1>Interfaccia di ricerca Solr</h1>
+  <select id="queryMenu">
+    <!-- Opzioni del menu a tendina verranno popolate dinamicamente -->
+  </select>
+  <button onclick="eseguiRicerca()">Esegui Ricerca</button>
+
+  <!-- Aggiungi altri elementi HTML per visualizzare i risultati della ricerca -->
+  <div id="searchResults"></div>
+
+  <!-- Carico il file JSON per popolare il menu a tendina -->
+  <script>
+    fetch('utils/query.json') // Aggiorna con l'URL corretto del tuo file JSON
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(data) {
+        var queryMenu = document.getElementById("queryMenu");
+        data.forEach(function(option) {
+          var optionElement = document.createElement("option");
+          optionElement.value = option.id;
+          optionElement.innerText = option.text;
+          queryMenu.appendChild(optionElement);
+        });
+      })
+      .catch(function(error) {
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
