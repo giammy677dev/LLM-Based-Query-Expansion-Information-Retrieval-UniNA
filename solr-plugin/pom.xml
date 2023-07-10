@@ -27,11 +27,13 @@
             <artifactId>solr-core</artifactId>
             <version>8.11.2</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20230227</version>
-        </dependency>
     </dependencies>
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/java/com/example/solrplugin/utils</directory>
+            </resource>
+        </resources>
+    </build>
 </project>

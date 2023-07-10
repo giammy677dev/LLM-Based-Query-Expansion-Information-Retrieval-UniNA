@@ -103,3 +103,28 @@ function calculatePrecision(numDocumentiRilevanti, position) {
   var precision = (numDocumentiRilevanti / position) * 100;
   return precision.toFixed(2); // Arrotonda il valore a 2 cifre decimali
 }
+
+
+function doSearchChatGPT() {
+  var queryMenu = document.getElementById("queryMenu");
+  var queryId = parseInt(queryMenu.value, 10);
+  var queryText = queryMenu.options[queryMenu.selectedIndex].text;
+
+  loadRelevancyData(queryId, function(relevancyData) {
+    var xhrSolr = new XMLHttpRequest();
+    xhrSolr.onreadystatechange = function() {
+      if (xhrSolr.readyState === XMLHttpRequest.DONE) {
+        if (xhrSolr.status === 200) {
+          var response = JSON.parse(xhrSolr.responseText);
+          var searchResultsDiv = document.getElementById("searchResults");
+          displaySearchResults(response, relevancyData, searchResultsDiv);
+        } else {
+          console.error("Errore durante la ricerca:", xhrSolr.status);
+        }
+      }
+    };
+
+    xhrSolr.open("GET", "http://localhost:8983/solr/projectCore/selectGPT?indent=true&q.op=OR&q=" + encodeURIComponent(queryText) + "&rows=1400");
+    xhrSolr.send();
+  });
+}
