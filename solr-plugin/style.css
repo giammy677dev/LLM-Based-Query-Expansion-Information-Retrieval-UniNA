@@ -1,0 +1,42 @@
+/* style.css */
+
+/* Stile per il titolo */
+h1 {
+    text-align: center;
+  }
+  
+  /* Stile per il menu a tendina */
+  #queryMenu {
+    display: block;
+    margin: 20px auto;
+    padding: 10px;
+  }
+  
+  /* Stile per il pulsante di ricerca */
+  button {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  /* Stile per i risultati della ricerca */
+  #searchResults {
+    margin-top: 20px;
+  }
+  
+  /* Stile per i singoli risultati */
+  #searchResults div {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+  
+  /* Stile per il testo in grassetto */
+  #searchResults div b {
+    font-weight: bold;
+  }
+  
