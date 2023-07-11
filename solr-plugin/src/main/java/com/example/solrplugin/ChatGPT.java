@@ -10,6 +10,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class ChatGPT {
     public static void chatGPT(String text) throws Exception {
         HttpClient httpClient = HttpClients.createDefault();
@@ -37,15 +40,20 @@ public class ChatGPT {
             // Legge la risposta
             HttpEntity entity = response.getEntity();
             String responseBody = EntityUtils.toString(entity);
-            System.out.println(responseBody);
 
-            // Fai attenzione a gestire eventuali eccezioni e a chiudere le risorse correttamente
+            // Utilizza la libreria JSON di Java per analizzare la risposta JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode responseJson = objectMapper.readTree(responseBody);
+
+            // Estrai il campo "content" dalla risposta JSON
+            String content = responseJson.get("choices").get(0).get("message").get("content").asText();
+            System.out.println(content);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args) throws Exception {
-        chatGPT("This is a test.");
+        chatGPT("Dimmi qualcosa su Charles Leclerc");
     }
 }

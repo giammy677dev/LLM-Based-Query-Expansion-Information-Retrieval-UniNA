@@ -3,6 +3,15 @@ package com.example.solrplugin;
 import org.apache.solr.handler.component.ResponseBuilder;
 import org.apache.solr.handler.component.SearchComponent;
 import java.io.IOException;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,23 +65,35 @@ public class customPlugin extends SearchComponent {
 
         contentDocumentsList = getDocumentsContent(filteredIdDocumentsList); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
         
-        //chatGPTQuery = 
-        
-        
+        // Preparo la richiesta a ChatGPT
+        String chatGPTQuery = "";
+        for (String content: contentDocumentsList) {
+            String chatGPTResponse = chatGPTRequest("Scrivimi in inglese le possibili query che un utente potrebbe fare per vedersi restituito il seguente documento da un sistema di Information Retrieval: " + content + ". Scrivimi soltanto le possibili query senza aggiungere nessun altro testo.");
+            chatGPTQuery = chatGPTQuery + chatGPTResponse;
+        }
 
+        chatGPTQuery = chatGPTQuery.replaceAll("\\d", ""); // Rimuovo i numeri
+        chatGPTQuery = chatGPTQuery.replaceAll("\\p{Punct}", ""); // Rimuovo i segni di interpunzione
+        chatGPTQuery = chatGPTQuery.replace("\n", ""); // Rimuovo eventuali ritorni a capo
 
-
+        if (chatGPTQuery.length() > 500) {
+            chatGPTQuery.substring(0, 500);
+        }
         
-        //String expandedQuery = originalQuery + chatGPTQuery;
+        LOG.info("CHATGPT QUERY NO NUM NO PUNCT: " + chatGPTQuery);
+        
+        String expandedQuery = originalQuery + chatGPTQuery;
+
+        LOG.info("QUERY ESPANSA che mando a Solr: " + expandedQuery);
 
         ModifiableSolrParams newParams = new ModifiableSolrParams(rb.req.getParams());
-        //newParams.set("q", expandedQuery);
+        newParams.set("q", expandedQuery);
         rb.req.setParams(newParams);
     }
 
     @Override
     public void process(ResponseBuilder rb) throws IOException {
-        LOG.info("Sono nel process");
+        LOG.info("PROCESS");
         LOG.info(rb.req.getParams().get("q"));
     }
 
@@ -163,4 +184,44 @@ public class customPlugin extends SearchComponent {
         return contentDocumentsList;
     }
 
+    // Invio i documenti selezionati a ChatGPT
+    public static String chatGPTRequest(String text) {
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost("https://api.openai.com/v1/chat/completions");
+
+        // Imposta l'header di autorizzazione con il tuo token API di OpenAI
+        httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer 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");
+
+        // Imposta l'header per indicare il tipo di contenuto JSON
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+
+        String model = "gpt-3.5-turbo";
+        String role = "user";
+        String max_tokens = "3500";
+        String content = "";
+
+        String jsonPayload = String.format("{\"model\": \"%s\",\"messages\":[{\"role\":\"%s\",\"content\":\"%s\"}],\"max_tokens\":%s}", model, role, text, max_tokens);
+
+        try {
+            // Imposta il corpo della richiesta con il payload JSON
+            httpPost.setEntity(new StringEntity(jsonPayload));
+
+            // Esegue la richiesta
+            HttpResponse response = httpClient.execute(httpPost);
+
+            // Legge la risposta
+            HttpEntity entity = response.getEntity();
+            String responseBody = EntityUtils.toString(entity);
+
+            // Utilizza la libreria JSON di Java per analizzare la risposta JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode responseJson = objectMapper.readTree(responseBody);
+
+            // Estrai il campo "content" dalla risposta JSON
+            content = responseJson.get("choices").get(0).get("message").get("content").asText();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return content;
+    }
 }
