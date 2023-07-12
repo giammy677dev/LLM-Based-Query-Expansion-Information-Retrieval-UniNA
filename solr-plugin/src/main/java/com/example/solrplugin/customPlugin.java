@@ -23,15 +23,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 
 public class customPlugin extends SearchComponent {
     private static final Logger LOG = LoggerFactory.getLogger(customPlugin.class);
     String queryFilePath = "/query.json";
     String relFilePath = "/CranQREL.json";
     String docFilePath = "/corpus.json";
-    int query_id = 0;
-    List<String> idDocumentsList = new ArrayList<>();
-    List<String> contentDocumentsList = new ArrayList<>();
 
     @Override
     public void prepare(ResponseBuilder rb) throws IOException {
@@ -39,12 +37,12 @@ public class customPlugin extends SearchComponent {
         LOG.info("Query originale");
         LOG.info(originalQuery);
 
-        query_id = getQueryID(originalQuery); //Chiamo la funzione per ottenere l'ID della query selezionata
+        int query_id = getQueryID(originalQuery); //Chiamo la funzione per ottenere l'ID della query selezionata
         LOG.info("ID query: " + query_id);
 
-        idDocumentsList.clear(); //Svuoto l'array dei documenti prima di riempirlo con gli id dei documenti rilevanti per la query selezionata
+        //idDocumentsList.clear(); //Svuoto l'array dei documenti prima di riempirlo con gli id dei documenti rilevanti per la query selezionata
 
-        idDocumentsList = getDocumentsID(); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
+        List<String> idDocumentsList = getDocumentsID(query_id); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
 
         LOG.info("Lista degli id_documento corrispondenti:");
         for (String id_documento : idDocumentsList) {
@@ -53,7 +51,7 @@ public class customPlugin extends SearchComponent {
 
         // Di tutti i documenti rilevanti, ne prendo solo 1/3 per passarli a ChatGPT
         int idDocumentsListSize = idDocumentsList.size();
-        int filteredIdDocumentsListSize = Math.max(idDocumentsListSize / 3, 1); // Calcola la nuova dimensione della lista
+        int filteredIdDocumentsListSize = Math.max((idDocumentsListSize / 3), 1); // Calcola la nuova dimensione della lista
         List<String> filteredIdDocumentsList = new ArrayList<>(idDocumentsList.subList(0, filteredIdDocumentsListSize));
 
         LOG.info("Lista degli id_documento filtrati:");
@@ -61,9 +59,10 @@ public class customPlugin extends SearchComponent {
             LOG.info("id_documento ARRAY FILTRATO: " + id_documento);
         }
         
-        contentDocumentsList.clear(); //Svuoto l'array dei documenti prima di riempirlo con il contenuto dei documenti rilevanti per la query selezionata da passare a ChatGPT
+        //contentDocumentsList.clear(); //Svuoto l'array dei documenti prima di riempirlo con il contenuto dei documenti rilevanti per la query selezionata da passare a ChatGPT
 
-        contentDocumentsList = getDocumentsContent(filteredIdDocumentsList); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
+        LOG.info("Chiamo la funzione per ottenere il contenuto dei documenti rilevanti");
+        List<String> contentDocumentsList = getDocumentsContent(filteredIdDocumentsList); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
         
         // Preparo la richiesta a ChatGPT
         String chatGPTQuery = "";
@@ -75,16 +74,10 @@ public class customPlugin extends SearchComponent {
         chatGPTQuery = chatGPTQuery.replaceAll("\\d", ""); // Rimuovo i numeri
         chatGPTQuery = chatGPTQuery.replaceAll("\\p{Punct}", ""); // Rimuovo i segni di interpunzione
         chatGPTQuery = chatGPTQuery.replace("\n", ""); // Rimuovo eventuali ritorni a capo
-
-        if (chatGPTQuery.length() > 500) {
-            chatGPTQuery.substring(0, 500);
-        }
-        
-        LOG.info("CHATGPT QUERY NO NUM NO PUNCT: " + chatGPTQuery);
         
         String expandedQuery = originalQuery + chatGPTQuery;
 
-        LOG.info("QUERY ESPANSA che mando a Solr: " + expandedQuery);
+        //LOG.info("QUERY ESPANSA che mando a Solr: " + expandedQuery);
 
         ModifiableSolrParams newParams = new ModifiableSolrParams(rb.req.getParams());
         newParams.set("q", expandedQuery);
@@ -104,6 +97,7 @@ public class customPlugin extends SearchComponent {
 
     // QUERY - Cerco la corrispondenza (tramite il suo testo) tra l'ID della query selezionata e l'ID della query in query.json
     public int getQueryID(String originalQuery) {
+        int query_id = 0;
         try {
             ObjectMapper queryMapper = new ObjectMapper();
             JsonNode queryRootNode;
@@ -130,7 +124,8 @@ public class customPlugin extends SearchComponent {
     }
 
     // REL - Cerco gli ID dei documenti rilevanti per la query selezionata in CranQREL.json
-    public List<String> getDocumentsID() {
+    public List<String> getDocumentsID(int query_id) {
+        List<String> idDocumentsList = new ArrayList<>();
         try {
             ObjectMapper relMapper = new ObjectMapper();
             JsonNode relRootNode;
@@ -157,12 +152,13 @@ public class customPlugin extends SearchComponent {
 
     // DOC - Cerco il contenuto dei documenti rilevanti per la query selezionata in corpus.json
     public List<String> getDocumentsContent(List<String> filteredIdDocumentsList) {
+        List<String> contentDocumentsList = new ArrayList<>();
         try {
             ObjectMapper docMapper = new ObjectMapper();
             JsonNode docRootNode;
             try (InputStream docInputStream = customPlugin.class.getResourceAsStream(docFilePath);
                  InputStreamReader docReader = new InputStreamReader(docInputStream)) {
-                docRootNode = docMapper.readTree(docReader);
+                    docRootNode = docMapper.readTree(docReader);
             }
 
             if (docRootNode.isArray()) {
@@ -173,6 +169,7 @@ public class customPlugin extends SearchComponent {
                         int filteredIdInt = Integer.parseInt(filteredId);
                         if (id_doc == filteredIdInt) {
                             String document_content = docJsonNode.get("Content").asText();
+                            LOG.info("Contenuto messo");
                             contentDocumentsList.add(document_content);
                         }
                     }
