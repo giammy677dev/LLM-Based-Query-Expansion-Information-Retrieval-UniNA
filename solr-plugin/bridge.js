@@ -22,89 +22,6 @@ function doSearch() {
   });
 }
 
-function loadRelevancyData(queryId, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === XMLHttpRequest.DONE) {
-      if (xhr.status === 200) {
-        var relevancyData = JSON.parse(xhr.responseText);
-
-        // Filtra solo gli oggetti con id_query corrispondente alla query selezionata
-        var filteredData = relevancyData.filter(function(entry) {
-          return entry.id_query === queryId.toString();
-        });
-
-        // Crea un array con gli ID dei documenti rilevanti
-        var relevantDocuments = filteredData.map(function(entry) {
-          return entry.id_documento;
-        });
-        callback(relevantDocuments);
-      } else {
-        console.error("Errore durante il caricamento delle relazioni di rilevanza:", xhr.status);
-      }
-    }
-  };
-
-  xhr.open("GET", "utils/CranQREL.json");
-  xhr.send();
-}
-
-function displaySearchResults(results, relevantDocuments, searchResultsDiv) {
-  searchResultsDiv.innerHTML = "";
-
-  var relevantDocumentsForChatGPT = getRelevantDocumentsForChatGPT(relevantDocuments);
-
-  relevantDocuments = relevantDocuments.filter(document => {
-    return !relevantDocumentsForChatGPT.includes(document);
-  });
-
-  var docs = results.response.docs;
-  var numDocumentiRilevanti = 0; // Contatore per il numero di documenti rilevanti
-  var totalDocumentiRilevanti = relevantDocuments.length; // Numero totale di documenti rilevanti
-
-  for (var i = 0; i < docs.length; i++) {
-    var result = docs[i];
-    var resultDiv = document.createElement("div");
-
-    var title = result.Title[0];
-    var doc_id = result.ID[0];
-    
-    if (relevantDocuments.includes(doc_id.toString())) {
-      numDocumentiRilevanti++;
-      var position = i + 1;
-
-      var boldTitle = document.createElement("b");
-      boldTitle.textContent = "ID: " + doc_id + " - Titolo: " + title + " - Position: " + position + " - Numero documento: " + numDocumentiRilevanti +  " - Recall: " + calculateRecall(numDocumentiRilevanti, totalDocumentiRilevanti) + "% - Precision: " + calculatePrecision(numDocumentiRilevanti, position) + "%";
-      resultDiv.appendChild(boldTitle);
-    } else {
-      resultDiv.textContent = "ID: " + doc_id + " - Titolo: " + title;
-    }
-
-    searchResultsDiv.appendChild(resultDiv);
-  }
-}
-
-function getRelevantDocumentsForChatGPT(relevantDocuments) {
-  var relevantDocumentsForChatGPT = relevantDocuments.slice(0, Math.floor(relevantDocuments.length / 3));
-  if (relevantDocumentsForChatGPT.length === 0) {
-    relevantDocumentsForChatGPT.push(relevantDocuments[0]);
-  }
-  return relevantDocumentsForChatGPT;
-}
-
-function calculateRecall(numDocumentiRilevanti, totalDocumentiRilevanti) {
-  // Calcola il valore di Recall
-  var recall = (numDocumentiRilevanti / totalDocumentiRilevanti) * 100;
-  return recall.toFixed(2); // Arrotonda il valore a 2 cifre decimali
-}
-
-function calculatePrecision(numDocumentiRilevanti, position) {
-  // Calcola il valore di Precision
-  var precision = (numDocumentiRilevanti / position) * 100;
-  return precision.toFixed(2); // Arrotonda il valore a 2 cifre decimali
-}
-
-
 function doSearchChatGPT() {
   var queryMenu = document.getElementById("queryMenu");
   var queryId = parseInt(queryMenu.value, 10);
@@ -127,4 +44,85 @@ function doSearchChatGPT() {
     xhrSolr.open("GET", "http://localhost:8983/solr/projectCore/selectGPT?indent=true&q.op=OR&q=" + encodeURIComponent(queryText) + "&rows=1400");
     xhrSolr.send();
   });
+}
+
+function loadRelevancyData(queryId, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        var relevancyData = JSON.parse(xhr.responseText);
+
+        // Filtra solo gli oggetti con id_query corrispondente alla query selezionata
+        var filteredData = relevancyData.filter(function(entry) {
+          return entry.id_query === queryId.toString();
+        });
+
+        // Crea un array con gli ID dei documenti rilevanti
+        var relevantDocs = filteredData.map(function(entry) {
+          return entry.id_documento;
+        });
+        callback(relevantDocs);
+      } else {
+        console.error("Errore durante il caricamento delle relazioni di rilevanza:", xhr.status);
+      }
+    }
+  };
+
+  xhr.open("GET", "utils/CranQREL.json");
+  xhr.send();
+}
+
+function displaySearchResults(results, relevantDocs, searchResultsDiv) {
+  searchResultsDiv.innerHTML = "";
+
+  var relevantDocsForChatGPT = getRelevantDocumentsForChatGPT(relevantDocs);
+
+  var docs = results.response.docs;
+  var numRelevantDocs = 0; // Contatore per il numero di documenti rilevanti trovati
+  var numRelevantDocsUsedForChatGPT = 0; // Contatore per il numero di documenti rilevanti trovati ma che sono stati usati per ChatGPT e quindi vanno esclusi
+  var totalRelevantDocs = relevantDocs.length - relevantDocsForChatGPT.length; // Numero totale di documenti rilevanti esclusi quelli utilizzati per ChatGPT
+
+  for (var i = 0; i < docs.length; i++) {
+    var result = docs[i];
+    var resultDiv = document.createElement("div");
+
+    var title = result.Title[0];
+    var doc_id = result.ID[0];
+
+    if (!relevantDocsForChatGPT.includes(doc_id.toString())) { // Se il documento non è incluso nei documenti mandati a ChatGPT...
+      if (relevantDocs.includes(doc_id.toString())) { // ... e se è rilevante, allora entra
+        numRelevantDocs++;
+        var position = i - numRelevantDocsUsedForChatGPT + 1; //Posizione nel ranking di un documento rilevante non utilizzato per ChatGPT
+
+        var boldTitle = document.createElement("b");
+        boldTitle.textContent = "ID: " + doc_id + " - Titolo: " + title + " - Posizione: " + position + " - Numero documento: " + numRelevantDocs +  " - Recall: " + calculateRecall(numRelevantDocs, totalRelevantDocs) + "% - Precision: " + calculatePrecision(numRelevantDocs, position) + "%";
+        resultDiv.appendChild(boldTitle);
+      } else {
+        resultDiv.textContent = "ID: " + doc_id + " - Titolo: " + title;
+      }
+      searchResultsDiv.appendChild(resultDiv);
+    }
+    else {
+      numRelevantDocsUsedForChatGPT++;
+    }
+  }
+}
+
+function getRelevantDocumentsForChatGPT(relevantDocs) {
+  var relevantDocsForChatGPT = relevantDocs.slice(0, Math.floor(relevantDocs.length / 3));
+  if (relevantDocsForChatGPT.length === 0) {
+    relevantDocsForChatGPT.push(relevantDocs[0]);
+  }
+  return relevantDocsForChatGPT;
+}
+
+function calculateRecall(numRelevantDocs, totalRelevantDocs) {
+  var recall = (numRelevantDocs / totalRelevantDocs) * 100;
+  return recall.toFixed(2); // Arrotonda il valore a 2 cifre decimali
+}
+
+function calculatePrecision(numRelevantDocs, position) {
+  var precision = (numRelevantDocs / position) * 100;
+  return precision.toFixed(2); // Arrotonda il valore a 2 cifre decimali
 }

@@ -40,8 +40,6 @@ public class customPlugin extends SearchComponent {
         int query_id = getQueryID(originalQuery); //Chiamo la funzione per ottenere l'ID della query selezionata
         LOG.info("ID query: " + query_id);
 
-        //idDocumentsList.clear(); //Svuoto l'array dei documenti prima di riempirlo con gli id dei documenti rilevanti per la query selezionata
-
         List<String> idDocumentsList = getDocumentsID(query_id); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
 
         LOG.info("Lista degli id_documento corrispondenti:");
@@ -59,9 +57,6 @@ public class customPlugin extends SearchComponent {
             LOG.info("id_documento ARRAY FILTRATO: " + id_documento);
         }
         
-        //contentDocumentsList.clear(); //Svuoto l'array dei documenti prima di riempirlo con il contenuto dei documenti rilevanti per la query selezionata da passare a ChatGPT
-
-        LOG.info("Chiamo la funzione per ottenere il contenuto dei documenti rilevanti");
         List<String> contentDocumentsList = getDocumentsContent(filteredIdDocumentsList); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
         
         // Preparo la richiesta a ChatGPT
@@ -76,8 +71,6 @@ public class customPlugin extends SearchComponent {
         chatGPTQuery = chatGPTQuery.replace("\n", ""); // Rimuovo eventuali ritorni a capo
         
         String expandedQuery = originalQuery + chatGPTQuery;
-
-        //LOG.info("QUERY ESPANSA che mando a Solr: " + expandedQuery);
 
         ModifiableSolrParams newParams = new ModifiableSolrParams(rb.req.getParams());
         newParams.set("q", expandedQuery);
@@ -169,7 +162,6 @@ public class customPlugin extends SearchComponent {
                         int filteredIdInt = Integer.parseInt(filteredId);
                         if (id_doc == filteredIdInt) {
                             String document_content = docJsonNode.get("Content").asText();
-                            LOG.info("Contenuto messo");
                             contentDocumentsList.add(document_content);
                         }
                     }

@@ -12,14 +12,14 @@
     <!-- Opzioni del menu a tendina verranno popolate dinamicamente -->
   </select>
   <button onclick="doSearch()">Cerca</button>
-  <button onclick="doSearchChatGPT()">CercaGPT</button>
 
   <!-- Aggiungi altri elementi HTML per visualizzare i risultati della ricerca -->
   <div id="searchResults"></div>
+  <div id="searchResultsChatGPT"></div>
 
   <!-- Carico il file JSON per popolare il menu a tendina -->
   <script>
-    fetch('utils/query.json') // Aggiorna con l'URL corretto del tuo file JSON
+    fetch('src/main/java/com/example/solrplugin/utils/query.json')
       .then(function(response) {
         return response.json();
       })
