@@ -1,11 +1,15 @@
 /* style.css */
 
-/* Stile per il titolo */
+/* Stile per i titoli */
 h1 {
   text-align: center;
 }
 
 h2 {
+  text-align: center;
+}
+
+h3 {
   text-align: center;
 }
 
@@ -43,21 +47,40 @@ button {
 }
 
 /* Stile per ogni colonna */
-.column {
+.column-noGPT {
   flex-basis: 45%;
 }
 
-/* Stile per il titolo di ogni colonna */
-.column-title {
-  text-align: center;
-  margin-top: 0;
+/* Stile per ogni colonna */
+.column-GPT {
+  flex-basis: 45%;
+}
+
+#noGPTChart {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  width:100%;
+}
+
+#GPTChart {
+  padding-left: 0;
+  padding-right: 0;
+  margin-right: auto;
+  width: 100%;
 }
 
 /* Stile per i risultati della ricerca */
-#searchResults,
+#searchResults {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+
 #searchResultsChatGPT {
   margin-top: 20px;
   margin-bottom: 10px;
+  padding-right: 10px;
 }
 
 /* Stile per i singoli risultati */

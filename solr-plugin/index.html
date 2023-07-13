@@ -4,6 +4,7 @@
   <title>Progetto di Information Retrieval</title>
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="bridge.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 </head>
 <body>
   <h1>Progetto di Information Retrieval</h1>
@@ -14,13 +15,16 @@
   </div>
 
   <div class="container">
-    <div class="column">
-      <h3 class="column-title">Ranking</h2>
+    <div class="column-noGPT">
+      <canvas id="noGPTChart"></canvas>
+      <h3 id="noGPTTitle"></h3>
       <div id="searchResults"></div>
     </div>
-    <div class="column">
-      <h3 class="column-title">Ranking utilizzando ChatGPT</h2>
+    <div class="column-GPT">
+      <canvas id="GPTChart"></canvas>
+      <h3 id="GPTTitle"></h3>
       <div id="searchResultsChatGPT"></div>
+      <div id="loading" style="display: none;"><p>Caricamento in corso...</p></div>
     </div>
   </div>
 
