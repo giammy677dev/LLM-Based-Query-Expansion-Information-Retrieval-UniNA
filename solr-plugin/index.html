@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Interfaccia di ricerca Solr</title>
-  <!-- Includi il tuo file CSS -->
+  <title>Progetto di Information Retrieval</title>
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="bridge.js"></script>
 </head>
 <body>
-  <h1>Interfaccia di ricerca Solr</h1>
-  <select id="queryMenu">
-    <!-- Opzioni del menu a tendina verranno popolate dinamicamente -->
-  </select>
-  <button onclick="doSearch()">Cerca</button>
+  <h1>Progetto di Information Retrieval</h1>
+  <h2>Query Expansion tramite l'utilizzo di ChatGPT</h2>
+  <div class="search-bar">
+    <select id="queryMenu"></select>
+    <button onclick="doSearch()">Cerca</button>
+  </div>
 
-  <!-- Aggiungi altri elementi HTML per visualizzare i risultati della ricerca -->
-  <div id="searchResults"></div>
-  <div id="searchResultsChatGPT"></div>
+  <div class="container">
+    <div class="column">
+      <h3 class="column-title">Ranking</h2>
+      <div id="searchResults"></div>
+    </div>
+    <div class="column">
+      <h3 class="column-title">Ranking utilizzando ChatGPT</h2>
+      <div id="searchResultsChatGPT"></div>
+    </div>
+  </div>
 
-  <!-- Carico il file JSON per popolare il menu a tendina -->
   <script>
     fetch('src/main/java/com/example/solrplugin/utils/query.json')
       .then(function(response) {

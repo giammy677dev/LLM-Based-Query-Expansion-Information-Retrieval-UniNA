@@ -11,6 +11,7 @@ function doSearch() {
           var response = JSON.parse(xhrSolr.responseText);
           var searchResultsDiv = document.getElementById("searchResults");
           displaySearchResults(response, relevancyData, searchResultsDiv);
+          doSearchChatGPT();
         } else {
           console.error("Errore durante la ricerca:", xhrSolr.status);
         }
@@ -33,7 +34,7 @@ function doSearchChatGPT() {
       if (xhrSolr.readyState === XMLHttpRequest.DONE) {
         if (xhrSolr.status === 200) {
           var response = JSON.parse(xhrSolr.responseText);
-          var searchResultsDiv = document.getElementById("searchResults");
+          var searchResultsDiv = document.getElementById("searchResultsChatGPT");
           displaySearchResults(response, relevancyData, searchResultsDiv);
         } else {
           console.error("Errore durante la ricerca:", xhrSolr.status);
