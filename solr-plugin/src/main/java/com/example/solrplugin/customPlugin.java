@@ -34,28 +34,15 @@ public class customPlugin extends SearchComponent {
     @Override
     public void prepare(ResponseBuilder rb) throws IOException {
         String originalQuery = rb.req.getParams().get("q");
-        LOG.info("Query originale");
-        LOG.info(originalQuery);
 
         int query_id = getQueryID(originalQuery); //Chiamo la funzione per ottenere l'ID della query selezionata
-        LOG.info("ID query: " + query_id);
 
         List<String> idDocumentsList = getDocumentsID(query_id); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
-
-        LOG.info("Lista degli id_documento corrispondenti:");
-        for (String id_documento : idDocumentsList) {
-            LOG.info("id_documento ARRAY ORIGINALE: " + id_documento);
-        }
 
         // Di tutti i documenti rilevanti, ne prendo solo 1/3 per passarli a ChatGPT
         int idDocumentsListSize = idDocumentsList.size();
         int filteredIdDocumentsListSize = Math.max((idDocumentsListSize / 3), 1); // Calcola la nuova dimensione della lista
         List<String> filteredIdDocumentsList = new ArrayList<>(idDocumentsList.subList(0, filteredIdDocumentsListSize));
-
-        LOG.info("Lista degli id_documento filtrati:");
-        for (String id_documento : filteredIdDocumentsList) {
-            LOG.info("id_documento ARRAY FILTRATO: " + id_documento);
-        }
         
         List<String> contentDocumentsList = getDocumentsContent(filteredIdDocumentsList); //Chiamo la funzione per ottenere gli ID dei documenti rilevanti per la query selezionata
         
