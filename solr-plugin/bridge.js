@@ -3,7 +3,6 @@ let GPTChart;
 const standardRecall = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
 function doSearch() {
-  clearUI();
   var queryMenu = document.getElementById("queryMenu");
   var queryId = parseInt(queryMenu.value, 10);
   var queryText = queryMenu.options[queryMenu.selectedIndex].text;
@@ -374,6 +373,7 @@ function clearUI() {
   GPTTitle.style.display = 'none';
   var searchResultsChatGPT = document.getElementById('searchResultsChatGPT');
   searchResultsChatGPT.style.display = 'none';
+  doSearch();
 }
 
 function showUI() {
