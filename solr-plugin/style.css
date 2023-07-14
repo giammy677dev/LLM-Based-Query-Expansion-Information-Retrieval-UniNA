@@ -56,6 +56,13 @@ button {
   flex-basis: 45%;
 }
 
+.loader-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-gap: 10px;
+  align-items: center;
+}
+
 #noGPTChart {
   padding-left: 0;
   padding-right: 0;
@@ -95,4 +102,24 @@ button {
 #searchResults div b,
 #searchResultsChatGPT div b {
   font-weight: bold;
+}
+
+#loader {
+  border: 6px solid #f3f3f3; /* Light grey */
+  border-top: 6px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 2s linear infinite;
+  -webkit-animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

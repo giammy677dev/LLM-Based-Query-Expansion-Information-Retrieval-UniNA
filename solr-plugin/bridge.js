@@ -34,12 +34,15 @@ function doSearchChatGPT() {
 
   var loadingElement = document.getElementById('loading');
   loadingElement.style.display = 'block'; // Mostra l'elemento di caricamento
+  var loaderElement = document.getElementById('loader');
+  loaderElement.style.display = 'block'; // Mostra l'elemento di caricamento
 
   loadRelevancyData(queryId, function(relevancyData) {
     var xhrSolr = new XMLHttpRequest();
     xhrSolr.onreadystatechange = function() {
       if (xhrSolr.readyState === XMLHttpRequest.DONE) {
         loadingElement.style.display = 'none'; // Nascondi l'elemento di caricamento
+        loaderElement.style.display = 'none'; // Nascondi l'elemento di caricamento
         if (xhrSolr.status === 200) {
           var response = JSON.parse(xhrSolr.responseText);
           var searchResultsDiv = document.getElementById("searchResultsChatGPT");
