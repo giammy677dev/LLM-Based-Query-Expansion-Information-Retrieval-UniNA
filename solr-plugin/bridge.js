@@ -32,17 +32,19 @@ function doSearchChatGPT() {
   var queryId = parseInt(queryMenu.value, 10);
   var queryText = queryMenu.options[queryMenu.selectedIndex].text;
 
+  //Mostra gli elementi di caricamento
   var loadingElement = document.getElementById('loading');
-  loadingElement.style.display = 'block'; // Mostra l'elemento di caricamento
+  loadingElement.style.display = 'block';
   var loaderElement = document.getElementById('loader');
-  loaderElement.style.display = 'block'; // Mostra l'elemento di caricamento
+  loaderElement.style.display = 'block';
 
   loadRelevancyData(queryId, function(relevancyData) {
     var xhrSolr = new XMLHttpRequest();
     xhrSolr.onreadystatechange = function() {
       if (xhrSolr.readyState === XMLHttpRequest.DONE) {
-        loadingElement.style.display = 'none'; // Nascondi l'elemento di caricamento
-        loaderElement.style.display = 'none'; // Nascondi l'elemento di caricamento
+        // Nascondi gli elementi di caricamento
+        loadingElement.style.display = 'none';
+        loaderElement.style.display = 'none';
         if (xhrSolr.status === 200) {
           var response = JSON.parse(xhrSolr.responseText);
           var searchResultsDiv = document.getElementById("searchResultsChatGPT");
@@ -179,6 +181,18 @@ function drawResults(precisionArray) {
             },
           ],
         },
+        tooltips: {
+          callbacks: {
+            title: function (tooltipItem, data) {
+              // Restituisci il testo desiderato per il titolo dell'etichetta del tooltip
+              return '';
+            },
+            label: function (tooltipItem, data) {
+              // Restituisci il testo desiderato per il testo vicino alle coordinate del punto
+              return 'Recall: ' + tooltipItem.xLabel + '%, Precision: ' + tooltipItem.yLabel + '%';
+            }
+          }
+        }
       },
     });
   } else {
@@ -284,6 +298,18 @@ function drawResultsGPT(precisionArray) {
             },
           ],
         },
+        tooltips: {
+          callbacks: {
+            title: function (tooltipItem, data) {
+              // Restituisci il testo desiderato per il titolo dell'etichetta del tooltip
+              return '';
+            },
+            label: function (tooltipItem, data) {
+              // Restituisci il testo desiderato per il testo vicino alle coordinate del punto
+              return 'Recall: ' + tooltipItem.xLabel + '%, Precision: ' + tooltipItem.yLabel + '%';
+            }
+          }
+        }
       },
     });
   } else {
