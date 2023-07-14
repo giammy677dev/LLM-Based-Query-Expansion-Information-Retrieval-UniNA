@@ -101,10 +101,13 @@ function displaySearchResults(results, relevantDocs, searchResultsDiv) {
 
   for (var i = 0; i < docs.length; i++) {
     var result = docs[i];
-    var resultDiv = document.createElement("div");
+    var resultDiv = document.createElement("button");
+    var contentDiv = document.createElement("div");
+    contentDiv.style.display = "none";
 
-    var title = result.Title[0];
     var doc_id = result.ID[0];
+    var title = result.Title[0];
+    var content = result.Content;
 
     if (!relevantDocsForChatGPT.includes(doc_id.toString())) { // Se il documento non è incluso nei documenti mandati a ChatGPT...
       if (relevantDocs.includes(doc_id.toString())) { // ... e se è rilevante, allora entra
@@ -124,7 +127,19 @@ function displaySearchResults(results, relevantDocs, searchResultsDiv) {
       } else {
         resultDiv.textContent = "ID: " + doc_id + " - Titolo: " + title;
       }
+      
+      resultDiv.addEventListener("click", function() {
+        if (this.nextElementSibling.style.display == "none") {
+          this.nextElementSibling.style.display = "block";
+        }
+        else {
+          this.nextElementSibling.style.display = "none";
+        }
+        
+      });
       searchResultsDiv.appendChild(resultDiv);
+      contentDiv.textContent = content;
+      searchResultsDiv.appendChild(contentDiv);
     }
     else {
       numRelevantDocsUsedForChatGPT++;
@@ -217,10 +232,14 @@ function displaySearchResultsGPT(results, relevantDocs, searchResultsDiv) {
 
   for (var i = 0; i < docs.length; i++) {
     var result = docs[i];
-    var resultDiv = document.createElement("div");
 
-    var title = result.Title[0];
+    var resultDiv = document.createElement("button");
+    var contentDiv = document.createElement("div");
+    contentDiv.style.display = "none";
+
     var doc_id = result.ID[0];
+    var title = result.Title[0];
+    var content = result.Content;
 
     if (!relevantDocsForChatGPT.includes(doc_id.toString())) { // Se il documento non è incluso nei documenti mandati a ChatGPT...
       if (relevantDocs.includes(doc_id.toString())) { // ... e se è rilevante, allora entra
@@ -240,7 +259,18 @@ function displaySearchResultsGPT(results, relevantDocs, searchResultsDiv) {
       } else {
         resultDiv.textContent = "ID: " + doc_id + " - Titolo: " + title;
       }
+      resultDiv.addEventListener("click", function() {
+        if (this.nextElementSibling.style.display == "none") {
+          this.nextElementSibling.style.display = "block";
+        }
+        else {
+          this.nextElementSibling.style.display = "none";
+        }
+        
+      });
       searchResultsDiv.appendChild(resultDiv);
+      contentDiv.textContent = content;
+      searchResultsDiv.appendChild(contentDiv);
     }
     else {
       numRelevantDocsUsedForChatGPT++;

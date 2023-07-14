@@ -30,7 +30,7 @@ h3 {
 }
 
 /* Stile per il pulsante di ricerca */
-button {
+#searchButton {
   padding: 10px 20px;
   background-color: #3498db;
   color: white;
@@ -48,12 +48,12 @@ button {
 
 /* Stile per ogni colonna */
 .column-noGPT {
-  flex-basis: 45%;
+  flex-basis: 48%;
 }
 
 /* Stile per ogni colonna */
 .column-GPT {
-  flex-basis: 45%;
+  flex-basis: 48%;
 }
 
 .loader-container {
@@ -95,7 +95,19 @@ button {
 #searchResultsChatGPT div {
   margin-bottom: 10px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #000000;
+  text-align: left;
+  background-color: #e6f3fc;
+}
+
+#searchResults button,
+#searchResultsChatGPT button {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #000000;
+  text-align: left;
+  background-color: #bee1f8;
+  width: 100%;
 }
 
 /* Stile per il testo in grassetto */
